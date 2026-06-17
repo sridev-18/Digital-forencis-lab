@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}{% if case %}Edit Case{% else %}New Case{% endif %}{% endblock %}
+{% block content %}
+<h3 class="mb-4"><i class="fa-solid fa-folder-plus"></i> {% if case %}Edit Case {{ case.case_number }}{% else %}New Case{% endif %}</h3>
+
+<div class="card p-4" style="max-width:720px;">
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label class="form-label">Title</label>
+            <input type="text" name="title" class="form-control" value="{{ case.title|default:'' }}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea name="description" class="form-control" rows="3" required>{{ case.description|default:'' }}</textarea>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Case Type</label>
+                <select name="case_type" class="form-select">
+                    {% for value, label in case_types %}
+                        <option value="{{ value }}" {% if case.case_type == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Priority</label>
+                <select name="priority" class="form-select">
+                    {% for value, label in priority_choices %}
+                        <option value="{{ value }}" {% if case.priority == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        {% if case %}
+        <div class="mb-3">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-select">
+                {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if case.status == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Suspect Name</label>
+                <input type="text" name="suspect_name" class="form-control" value="{{ case.suspect_name|default:'' }}">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Victim Name</label>
+                <input type="text" name="victim_name" class="form-control" value="{{ case.victim_name|default:'' }}">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Incident Location</label>
+                <input type="text" name="incident_location" class="form-control" value="{{ case.incident_location|default:'' }}">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Jurisdiction</label>
+                <input type="text" name="jurisdiction" class="form-control" value="{{ case.jurisdiction|default:'' }}">
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> {% if case %}Save Changes{% else %}Create Case{% endif %}</button>
+        <a href="{% url 'cases:list' %}" class="btn btn-outline-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

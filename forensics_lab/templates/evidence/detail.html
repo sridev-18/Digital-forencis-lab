@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}{{ evidence.original_filename }}{% endblock %}
+{% block content %}
+<h3 class="mb-4"><i class="fa-solid fa-file-shield"></i> {{ evidence.original_filename }}</h3>
+
+<div class="row g-4">
+    <div class="col-md-7">
+        <div class="card p-3 mb-3">
+            <h5>File Integrity</h5>
+            <table class="table table-sm">
+                <tr><th width="160">MD5</th><td class="hash-text">{{ evidence.md5_hash }}</td></tr>
+                <tr><th>SHA256</th><td class="hash-text">{{ evidence.sha256_hash }}</td></tr>
+                <tr><th>File Type</th><td>{{ evidence.file_type|default:"detecting..." }}</td></tr>
+                <tr><th>Size</th><td>{{ evidence.file_size_human }}</td></tr>
+                <tr><th>Uploaded by</th><td>{{ evidence.uploaded_by }}</td></tr>
+                <tr><th>Uploaded at</th><td>{{ evidence.uploaded_at|date:"d M Y, H:i" }}</td></tr>
+            </table>
+            <button class="btn btn-sm btn-outline-primary" onclick="verifyHash({{ evidence.pk }})">
+                <i class="fa-solid fa-fingerprint"></i> Re-verify Integrity
+            </button>
+            <div id="verify-result" class="mt-2"></div>
+        </div>
+
+        <div class="card p-3">
+            <h5><i class="fa-solid fa-flask"></i> Analysis Results</h5>
+            {% for task in analysis_tasks %}
+                <div class="border rounded p-2 mb-2">
+                    <strong>{{ task.get_task_type_display }}</strong>
+                    <span class="badge bg-secondary">{{ task.get_status_display }}</span>
+                    {% if task.is_suspicious %}<span class="badge bg-danger">Suspicious</span>{% endif %}
+                    <p class="small mb-0 mt-1">{{ task.result_summary }}</p>
+                </div>
+            {% empty %}
+                <p class="text-muted">Analysis pending or not yet started.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="col-md-5">
+        <div class="card p-3">
+            <h5><i class="fa-solid fa-link"></i> Chain of Custody</h5>
+            <ul class="list-unstyled small">
+            {% for entry in custody_chain %}
+                <li class="mb-2 pb-2 border-bottom">
+                    <strong>{{ entry.get_action_display }}</strong>
+                    {% if entry.hash_verified %}<i class="fa-solid fa-check-circle text-success"></i>{% endif %}
+                    <br>{{ entry.performed_by }} — {{ entry.timestamp|date:"d M Y, H:i:s" }}
+                    <br><span class="text-muted">{{ entry.notes }}</span>
+                </li>
+            {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+function verifyHash(id) {
+    fetch(`/evidence/${id}/verify/`)
+        .then(r => r.json())
+        .then(data => {
+            const el = document.getElementById('verify-result');
+            el.innerHTML = data.intact
+                ? `<div class="alert alert-success py-2 mb-0"><i class="fa-solid fa-check"></i> ${data.message}</div>`
+                : `<div class="alert alert-danger py-2 mb-0"><i class="fa-solid fa-triangle-exclamation"></i> ${data.message}</div>`;
+        });
+}
+</script>
+{% endblock %}

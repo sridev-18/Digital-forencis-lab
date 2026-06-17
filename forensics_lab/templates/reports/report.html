@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Report — {{ case.case_number }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3><i class="fa-solid fa-file-lines"></i> Investigation Report — {{ case.case_number }}</h3>
+    <a href="{% url 'reports:pdf' case.pk %}" class="btn btn-primary"><i class="fa-solid fa-file-pdf"></i> Download PDF</a>
+</div>
+
+<div class="card p-4 mb-3">
+    <h5>Case Summary</h5>
+    <table class="table table-sm">
+        <tr><th width="180">Title</th><td>{{ case.title }}</td></tr>
+        <tr><th>Type</th><td>{{ case.get_case_type_display }}</td></tr>
+        <tr><th>Status</th><td>{{ case.get_status_display }}</td></tr>
+        <tr><th>Priority</th><td>{{ case.get_priority_display }}</td></tr>
+        <tr><th>Created by</th><td>{{ case.created_by }}</td></tr>
+        <tr><th>Description</th><td>{{ case.description }}</td></tr>
+    </table>
+</div>
+
+<div class="card p-4 mb-3">
+    <h5>Evidence Summary ({{ evidence_list|length }})</h5>
+    <table class="table table-sm">
+        <thead><tr><th>File</th><th>SHA256</th><th>Status</th></tr></thead>
+        <tbody>
+        {% for ev in evidence_list %}
+            <tr><td>{{ ev.original_filename }}</td><td class="hash-text">{{ ev.sha256_hash }}</td><td>{{ ev.get_status_display }}</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="card p-4 mb-3">
+    <h5>Analysis Findings</h5>
+    {% for task in analysis_tasks %}
+        <div class="border rounded p-2 mb-2">
+            <strong>{{ task.evidence.original_filename }}</strong> — {{ task.get_task_type_display }}
+            <p class="small mb-0">{{ task.result_summary }}</p>
+        </div>
+    {% empty %}<p class="text-muted">No completed analysis yet.</p>{% endfor %}
+</div>
+
+<div class="card p-4">
+    <h5>Timeline</h5>
+    <ul class="list-unstyled small">
+    {% for event in timeline_events %}
+        <li class="mb-2 pb-2 border-bottom">{{ event.event_time|date:"d M Y H:i:s" }} — <strong>{{ event.get_event_type_display }}</strong>: {{ event.description }}</li>
+    {% empty %}<li class="text-muted">No timeline events recorded yet.</li>{% endfor %}
+    </ul>
+</div>
+{% endblock %}

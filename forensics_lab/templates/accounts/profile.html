@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}My Profile{% endblock %}
+{% block content %}
+<h3 class="mb-4"><i class="fa-solid fa-id-badge"></i> My Profile</h3>
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card p-4">
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3"><label class="form-label">First Name</label>
+                    <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}"></div>
+                <div class="mb-3"><label class="form-label">Last Name</label>
+                    <input type="text" name="last_name" class="form-control" value="{{ user.last_name }}"></div>
+                <div class="mb-3"><label class="form-label">Email</label>
+                    <input type="text" class="form-control" value="{{ user.email }}" disabled></div>
+                <div class="mb-3"><label class="form-label">Role</label>
+                    <input type="text" class="form-control" value="{{ user.get_role_display }}" disabled></div>
+                <div class="mb-3"><label class="form-label">Department</label>
+                    <input type="text" name="department" class="form-control" value="{{ user.department }}"></div>
+                <div class="mb-3"><label class="form-label">Phone</label>
+                    <input type="text" name="phone" class="form-control" value="{{ user.phone }}"></div>
+                <button class="btn btn-primary">Save Changes</button>
+            </form>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card p-4">
+            <h5>My Recent Activity</h5>
+            <ul class="list-unstyled small">
+            {% for log in recent_logs %}
+                <li class="mb-2 pb-2 border-bottom">{{ log.action }} — {{ log.description }}<br><span class="text-muted">{{ log.timestamp|date:"d M Y, H:i" }}</span></li>
+            {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

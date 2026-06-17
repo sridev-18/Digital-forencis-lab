@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Login — Cloud Forensics Lab{% endblock %}
+{% block guest_content %}
+<div class="d-flex align-items-center justify-content-center" style="min-height:100vh; background: linear-gradient(135deg,#0d1526,#1f2b45);">
+    <div class="card p-4 shadow" style="width: 380px;">
+        <div class="text-center mb-3">
+            <i class="fa-solid fa-shield-halved fa-2x text-primary"></i>
+            <h4 class="mt-2 mb-0">Cloud Forensics Lab</h4>
+            <small class="text-muted">Secure investigator login</small>
+        </div>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-danger py-2">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-control" required autofocus>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input type="password" name="password" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="fa-solid fa-right-to-bracket"></i> Sign In
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

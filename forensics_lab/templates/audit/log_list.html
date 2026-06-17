@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Audit Log{% endblock %}
+{% block content %}
+<h3 class="mb-4"><i class="fa-solid fa-list-check"></i> Audit Log</h3>
+<div class="card p-3">
+    <table class="table table-hover table-sm">
+        <thead><tr><th>User</th><th>Action</th><th>Resource</th><th>Description</th><th>IP</th><th>Time</th></tr></thead>
+        <tbody>
+        {% for log in logs %}
+            <tr>
+                <td>{{ log.user }}</td>
+                <td><span class="badge bg-secondary">{{ log.get_action_display }}</span></td>
+                <td>{{ log.resource_type }}</td>
+                <td>{{ log.description }}</td>
+                <td>{{ log.ip_address|default:"—" }}</td>
+                <td>{{ log.timestamp|date:"d M Y, H:i:s" }}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="6" class="text-center text-muted">No audit records yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

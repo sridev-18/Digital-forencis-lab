@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}{{ case.case_number }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+        <h3>{{ case.case_number }} — {{ case.title }}</h3>
+        <span class="badge bg-secondary">{{ case.get_status_display }}</span>
+        <span class="badge badge-priority-{{ case.priority }}">{{ case.get_priority_display }}</span>
+        <span class="badge bg-light text-dark border">{{ case.get_case_type_display }}</span>
+    </div>
+    <div>
+        <a href="{% url 'cases:update' case.pk %}" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-pen"></i> Edit</a>
+        <a href="{% url 'reports:view' case.pk %}" class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-file-lines"></i> Report</a>
+        <a href="{% url 'reports:pdf' case.pk %}" class="btn btn-primary btn-sm"><i class="fa-solid fa-file-pdf"></i> Export PDF</a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="card p-3 mb-3">
+            <h5><i class="fa-solid fa-circle-info"></i> Case Details</h5>
+            <p>{{ case.description }}</p>
+            <table class="table table-sm">
+                <tr><th width="160">Suspect</th><td>{{ case.suspect_name|default:"—" }}</td></tr>
+                <tr><th>Victim</th><td>{{ case.victim_name|default:"—" }}</td></tr>
+                <tr><th>Location</th><td>{{ case.incident_location|default:"—" }}</td></tr>
+                <tr><th>Jurisdiction</th><td>{{ case.jurisdiction|default:"—" }}</td></tr>
+                <tr><th>Created by</th><td>{{ case.created_by }}</td></tr>
+                <tr><th>Created at</th><td>{{ case.created_at|date:"d M Y, H:i" }}</td></tr>
+            </table>
+        </div>
+
+        <div class="card p-3 mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0"><i class="fa-solid fa-file-shield"></i> Evidence ({{ evidence_list|length }})</h5>
+                <a href="{% url 'evidence:upload' case.pk %}" class="btn btn-sm btn-primary"><i class="fa-solid fa-upload"></i> Upload Evidence</a>
+            </div>
+            <table class="table table-hover align-middle">
+                <thead><tr><th>File</th><th>Type</th><th>Size</th><th>SHA256</th><th>Status</th></tr></thead>
+                <tbody>
+                {% for ev in evidence_list %}
+                    <tr style="cursor:pointer" onclick="window.location='{% url 'evidence:detail' ev.pk %}'">
+                        <td>{{ ev.original_filename }}</td>
+                        <td>{{ ev.get_evidence_type_display }}</td>
+                        <td>{{ ev.file_size_human }}</td>
+                        <td class="hash-text">{{ ev.sha256_hash|slice:":16" }}...</td>
+                        <td><span class="badge bg-info text-dark">{{ ev.get_status_display }}</span></td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="5" class="text-center text-muted">No evidence uploaded yet.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card p-3">
+            <h5><i class="fa-solid fa-flask"></i> Analysis Tasks</h5>
+            <table class="table table-sm">
+                <thead><tr><th>Type</th><th>Evidence</th><th>Status</th><th>Suspicious</th><th>Threat Score</th></tr></thead>
+                <tbody>
+                {% for task in analysis_tasks %}
+                    <tr>
+                        <td>{{ task.get_task_type_display }}</td>
+                        <td>{{ task.evidence.original_filename }}</td>
+                        <td><span class="badge bg-secondary">{{ task.get_status_display }}</span></td>
+                        <td>{% if task.is_suspicious %}<span class="text-danger"><i class="fa-solid fa-triangle-exclamation"></i> Yes</span>{% else %}No{% endif %}</td>
+                        <td>{{ task.threat_score }}/100</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="5" class="text-center text-muted">No analysis tasks yet.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h5><i class="fa-solid fa-note-sticky"></i> Case Notes</h5>
+            <form method="post" action="{% url 'cases:add_note' case.pk %}" class="mb-3">
+                {% csrf_token %}
+                <textarea name="content" class="form-control mb-2" rows="2" placeholder="Add a note..." required></textarea>
+                <div class="form-check mb-2">
+                    <input type="checkbox" name="is_private" class="form-check-input" id="priv">
+                    <label class="form-check-label small" for="priv">Private note</label>
+                </div>
+                <button class="btn btn-sm btn-primary w-100">Add Note</button>
+            </form>
+            <hr>
+            {% for note in notes %}
+                <div class="mb-2 pb-2 border-bottom small">
+                    <strong>{{ note.author }}</strong> {% if note.is_private %}<span class="badge bg-warning text-dark">private</span>{% endif %}
+                    <br>{{ note.content }}
+                    <br><span class="text-muted">{{ note.created_at|date:"d M Y, H:i" }}</span>
+                </div>
+            {% empty %}
+                <p class="text-muted small">No notes yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

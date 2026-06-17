@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Upload Evidence{% endblock %}
+{% block content %}
+<h3 class="mb-4"><i class="fa-solid fa-upload"></i> Upload Evidence — {{ case.case_number }}</h3>
+<div class="card p-4" style="max-width:680px;">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label class="form-label">File</label>
+            <input type="file" name="file" class="form-control" required>
+            <small class="text-muted">SHA256 and MD5 hash will be computed automatically on upload.</small>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Evidence Type</label>
+            <select name="evidence_type" class="form-select">
+                {% for value, label in evidence_types %}
+                    <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea name="description" class="form-control" rows="2"></textarea>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Source Device</label>
+                <input type="text" name="source_device" class="form-control" placeholder="e.g. Dell Laptop">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Source Location</label>
+                <input type="text" name="source_location" class="form-control" placeholder="e.g. Chennai office">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Acquisition Tool</label>
+                <input type="text" name="acquisition_tool" class="form-control" placeholder="e.g. FTK Imager">
+            </div>
+        </div>
+        <button class="btn btn-primary"><i class="fa-solid fa-upload"></i> Upload & Analyse</button>
+        <a href="{% url 'cases:detail' case.pk %}" class="btn btn-outline-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}
