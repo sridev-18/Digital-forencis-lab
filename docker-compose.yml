@@ -1,4 +1,3 @@
-version: "3.9"
 
 services:
 
@@ -55,12 +54,13 @@ services:
     build: .
     container_name: forensics_web
     restart: always
+    working_dir: /app
     command: >
-      sh -c "python manage.py migrate &&
+      sh -c "python manage.py makemigrations &&
+             python manage.py migrate &&
              python manage.py collectstatic --noinput &&
              python manage.py runserver 0.0.0.0:8000"
     volumes:
-      - .:/app
       - static_files:/app/staticfiles
     ports:
       - "8000:8000"
@@ -89,9 +89,8 @@ services:
     build: .
     container_name: forensics_celery
     restart: always
+    working_dir: /app
     command: celery -A config worker --loglevel=info --concurrency=2
-    volumes:
-      - .:/app
     environment:
       - DEBUG=True
       - DB_HOST=db
@@ -115,6 +114,7 @@ services:
     build: .
     container_name: forensics_flower
     restart: always
+    working_dir: /app
     command: celery -A config flower --port=5555
     ports:
       - "5555:5555"
